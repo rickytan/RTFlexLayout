@@ -1,0 +1,28 @@
+PODS:
+  - RTFlexLayout (0.1.0):
+    - YogaKit (~> 1.14)
+  - Yoga (1.14.0)
+  - YogaKit (1.14.0):
+    - Yoga (~> 1.14)
+
+DEPENDENCIES:
+  - RTFlexLayout (from `../`)
+  - Yoga (from `../../Yoga`)
+  - YogaKit (from `../../Yoga`)
+
+EXTERNAL SOURCES:
+  RTFlexLayout:
+    :path: "../"
+  Yoga:
+    :path: "../../Yoga"
+  YogaKit:
+    :path: "../../Yoga"
+
+SPEC CHECKSUMS:
+  RTFlexLayout: 29bed0f0c6f4da7c2ef57fc754e5bf51ce3fa758
+  Yoga: 4e37119e8a5f69dc15c88709fed0337b651ee5cb
+  YogaKit: 87ab8b18e38f6f1094185bcd9d6ad33ce3e0b4aa
+
+PODFILE CHECKSUM: 2c794a7d10061d8d6c11ced2a39edfef760b8e98
+
+COCOAPODS: 1.8.0

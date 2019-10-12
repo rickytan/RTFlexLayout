@@ -1,0 +1,28 @@
+{
+  "name": "RTFlexLayout",
+  "version": "0.1.0",
+  "summary": "A short description of RTFlexLayout.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/rickytan/RTFlexLayout",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "rickytan": "ricky.tan.xin@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/rickytan/RTFlexLayout.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "source_files": "RTFlexLayout/Classes/**/*",
+  "frameworks": "UIKit",
+  "dependencies": {
+    "YogaKit": [
+      "~> 1.14"
+    ]
+  }
+}
