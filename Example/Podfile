@@ -1,0 +1,13 @@
+use_frameworks!
+
+platform :ios, '8.0'
+
+target 'RTFlexLayout_Example' do
+  pod 'RTFlexLayout', :path => '../'
+
+  target 'RTFlexLayout_Tests' do
+    inherit! :search_paths
+
+    
+  end
+end
