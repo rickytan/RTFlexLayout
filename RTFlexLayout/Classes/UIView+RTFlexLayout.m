@@ -55,27 +55,16 @@
     [super layoutSubviews];
 
     if (self.rt_enableAutoLayoutGuide) {
+        YGLayout *layout = self.rt_layout;
         [self.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
             if ([obj isKindOfClass:NSClassFromString(@"_UILayoutGuide")]) {
                 if (CGRectGetMinY(obj.frame) == 0) {
-                    [obj rt_configureLayoutWithBlock:^(YGLayout * _Nonnull layout) {
-                        layout.enabled = YES;
-                        layout.height = YGPointValue(obj.bounds.size.height);
-                        layout.width = YGPercentValue(100);
-                    }];
-                    [self sendSubviewToBack:obj];
+                    layout.paddingTop = YGPointValue(CGRectGetHeight(obj.bounds));
                 } else if (CGRectGetMaxY(obj.frame) == self.bounds.size.height) {
-                    [obj rt_configureLayoutWithBlock:^(YGLayout * _Nonnull layout) {
-                        layout.enabled = YES;
-                        layout.height = YGPointValue(obj.bounds.size.height);
-                        layout.width = YGPercentValue(100);
-                    }];
-                    [self bringSubviewToFront:obj];
+                    layout.paddingBottom = YGPointValue(CGRectGetHeight(obj.bounds));
                 }
             }
         }];
-    } else {
-        
     }
 
     if (!self.superview.isYogaEnabled) {
