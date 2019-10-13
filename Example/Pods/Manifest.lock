@@ -1,4 +1,5 @@
 PODS:
+  - Masonry (1.1.0)
   - RTFlexLayout (0.1.0):
     - YogaKit (~> 1.14)
   - Yoga (1.14.0)
@@ -6,9 +7,14 @@ PODS:
     - Yoga (~> 1.14)
 
 DEPENDENCIES:
+  - Masonry
   - RTFlexLayout (from `../`)
   - Yoga (from `../../Yoga`)
   - YogaKit (from `../../Yoga`)
+
+SPEC REPOS:
+  trunk:
+    - Masonry
 
 EXTERNAL SOURCES:
   RTFlexLayout:
@@ -19,10 +25,11 @@ EXTERNAL SOURCES:
     :path: "../../Yoga"
 
 SPEC CHECKSUMS:
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   RTFlexLayout: 29bed0f0c6f4da7c2ef57fc754e5bf51ce3fa758
   Yoga: 4e37119e8a5f69dc15c88709fed0337b651ee5cb
   YogaKit: 87ab8b18e38f6f1094185bcd9d6ad33ce3e0b4aa
 
-PODFILE CHECKSUM: 2c794a7d10061d8d6c11ced2a39edfef760b8e98
+PODFILE CHECKSUM: 35a8b95407a29a20b9cd6c83ed7c4c6280445837
 
 COCOAPODS: 1.8.0

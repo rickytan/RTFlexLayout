@@ -24,10 +24,10 @@
         layout.padding = YGPointValue(10);
         layout.flexDirection = YGFlexDirectionRow;
         layout.flexWrap = YGWrapWrap;
-        layout.alignItems = YGAlignCenter;
+        layout.alignItems = YGAlignFlexStart;
     }];
     self.view.rt_enableAutoLayoutGuide = YES;
-
+    [self.view addObserver:self forKeyPath:NSStringFromSelector(@selector(frame)) options:NSKeyValueObservingOptionNew context:NULL];
     {
         UILabel *label = [UILabel new];
         label.numberOfLines = 0;
@@ -39,17 +39,23 @@
         }];
     }
 
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 12; ++i)
     {
-        UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
-        button.backgroundColor = [UIColor blueColor];
-        button.titleLabel.font = [UIFont boldSystemFontOfSize:12];
-        [button setTitleColor:[UIColor orangeColor] forState:UIControlStateNormal];
+        UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
+        button.backgroundColor = [UIColor yellowColor];
+        button.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
+        button.layer.cornerRadius = 8;
+        button.titleLabel.font = [UIFont systemFontOfSize:12];
+        button.titleEdgeInsets = UIEdgeInsetsMake(10, 10, 10, 10);
+        [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         [button setTitle:[NSString stringWithFormat:@"Tag %d", i] forState:UIControlStateNormal];
+        [button sizeToFit];
         [button addTarget:self action:@selector(onAction:) forControlEvents:UIControlEventTouchUpInside];
         [button rt_configureLayoutWithBlock:^(YGLayout * _Nonnull layout) {
+            layout.alignSelf = YGAlignCenter;
             layout.marginRight = YGPointValue(6);
-            layout.paddingHorizontal = YGPointValue(4);
+            layout.padding = YGPointValue(4);
+            layout.minWidth = YGPointValue(64);
             layout.marginBottom = YGPointValue(10);
         }];
         [self.view addSubview:button];
@@ -67,21 +73,28 @@
     }
 }
 
-- (void)onAction:(id)sender
+- (void)viewDidLayoutSubviews
 {
-    UILabel *label = [self.view.subviews filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self isKindOfClass: %@", [UILabel class]]].firstObject;
-    [UIView animateWithDuration:0.3
-                     animations:^{
-        label.numberOfLines = label.numberOfLines == 0 ? 2 : 0;
-        [self.view bringSubviewToFront:sender];
-//        [sender rt_invalidateFlexLayout];
-    }];
+    [super viewDidLayoutSubviews];
+
+    [self.view rt_applyFlexLayout];
 }
 
-- (void)didReceiveMemoryWarning
+- (void)onAction:(id)sender
 {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    self.view.rt_enableAutoLayoutGuide = !self.view.rt_enableAutoLayoutGuide;
+//    UILabel *label = [self.view.subviews filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self isKindOfClass: %@", [UILabel class]]].firstObject;
+//    [UIView animateWithDuration:0.3
+//                     animations:^{
+//        label.numberOfLines = label.numberOfLines == 0 ? 2 : 0;
+//        [self.view bringSubviewToFront:sender];
+////        [sender rt_invalidateFlexLayout];
+//    }];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
+{
+    
 }
 
 @end
