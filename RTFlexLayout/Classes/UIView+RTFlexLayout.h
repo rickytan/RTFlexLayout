@@ -20,6 +20,8 @@ NS_ASSUME_NONNULL_BEGIN
 @interface UIView (RTFlexLayout)
 @property (nonatomic, readonly) YGLayout *rt_layout;
 @property (nonatomic, assign) BOOL rt_automaticallyExcludeWhenIntrinsicSizeIsZero;
+
+/// if set to YES, it will update paddingTop paddingBottom automatically
 @property (nonatomic, assign) BOOL rt_enableAutoLayoutGuide;
 
 - (void)rt_applyFlexLayout;

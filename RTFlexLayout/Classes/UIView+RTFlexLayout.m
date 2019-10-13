@@ -95,17 +95,18 @@
         YGLayout *layout = self.yoga;
         layout.enabled = !self.isHidden;
 
+        Class superClass = object_getClass(self);
         char name[128] = {};
-        sprintf(name, "RTFlexNotify_%s", class_getName(self.class));
+        sprintf(name, "RTFlexNotifying_%s", class_getName(superClass));
         Class flexClass = objc_lookUpClass(name);
         if (!flexClass) {
-            flexClass = objc_allocateClassPair(self.class, name, 0);
+            flexClass = objc_duplicateClass(superClass, name, 0);
+
             class_addMethod(flexClass, @selector(setNeedsLayout), class_getMethodImplementation([__RTFlexView class], @selector(setNeedsLayout)), "v@:");
             class_addMethod(flexClass, @selector(invalidateIntrinsicContentSize), class_getMethodImplementation([__RTFlexView class], @selector(invalidateIntrinsicContentSize)), "v@:");
             class_addMethod(flexClass, @selector(layoutSubviews), class_getMethodImplementation([__RTFlexView class], @selector(layoutSubviews)), "v@:");
             class_addMethod(flexClass, @selector(safeAreaInsetsDidChange), class_getMethodImplementation([__RTFlexView class], @selector(safeAreaInsetsDidChange)), "v@:");
             class_addMethod(flexClass, @selector(setHidden:), class_getMethodImplementation([__RTFlexView class], @selector(setHidden:)), "v@:b");
-            objc_registerClassPair(flexClass);
         }
         object_setClass(self, flexClass);
 
