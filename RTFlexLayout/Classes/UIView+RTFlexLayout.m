@@ -14,80 +14,33 @@
 
 #import "UIView+RTFlexLayout.h"
 
-@interface __RTFlexView : UIView
-@end
-
-@implementation __RTFlexView
-
-- (void)setNeedsLayout
-{
-    [super setNeedsLayout];
-    [self.rt_layout markDirty];
-}
-
-- (void)invalidateIntrinsicContentSize
-{
-    [super invalidateIntrinsicContentSize];
-
-    if (self.rt_automaticallyExcludeWhenIntrinsicSizeIsZero) {
-        CGSize size = [self intrinsicContentSize];
-        self.rt_layout.includedInLayout = size.width == 0 || size.height == 0;
-    }
-
-    [self rt_invalidateFlexLayout];
-}
-
-- (void)setHidden:(BOOL)hidden
-{
-    [super setHidden:hidden];
-
-    [self rt_configureLayoutWithBlock:^(YGLayout * _Nonnull layout) {
-        if (layout.isEnabled == hidden) {
-            layout.enabled = !hidden;
-            layout.includedInLayout = !hidden;
-            [self rt_invalidateFlexLayout];
-        }
-    }];
-}
-
-- (void)layoutSubviews
-{
-    [super layoutSubviews];
-
-    if (self.rt_enableAutoLayoutGuide) {
-        YGLayout *layout = self.rt_layout;
-        [self.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-            if ([obj isKindOfClass:NSClassFromString(@"_UILayoutGuide")]) {
-                if (CGRectGetMinY(obj.frame) == 0) {
-                    layout.paddingTop = YGPointValue(CGRectGetHeight(obj.bounds));
-                } else if (CGRectGetMaxY(obj.frame) == self.bounds.size.height) {
-                    layout.paddingBottom = YGPointValue(CGRectGetHeight(obj.bounds));
-                }
-            }
-        }];
-    }
-
-    if (!self.superview.isYogaEnabled) {
-        [self rt_applyFlexLayout];
-    }
-}
-
-- (void)safeAreaInsetsDidChange
-{
-    [super safeAreaInsetsDidChange];
-
-    if (!self.superview.isYogaEnabled) {
-        UIEdgeInsets insets = self.safeAreaInsets;
-        self.rt_layout.paddingTop = YGPointValue(insets.top);
-        self.rt_layout.paddingBottom = YGPointValue(insets.bottom);
-        self.rt_layout.paddingLeft = YGPointValue(insets.left);
-        self.rt_layout.paddingRight = YGPointValue(insets.right);
-    }
-}
-
-@end
+#define RTFLEXNOTIFYING_CLASS_PREFIX "RTFlexNotifying_"
 
 @implementation UIView (RTFlexLayout)
+
++ (void)_rt_flex_addMethodsForClass:(Class)cls {
+    const SEL selectors[] = {
+        @selector(class),
+        @selector(setNeedsLayout),
+        @selector(invalidateIntrinsicContentSize),
+        @selector(setHidden:),
+        @selector(layoutSubviews),
+        @selector(safeAreaInsetsDidChange),
+    };
+
+    const size_t length = sizeof(selectors) / sizeof(selectors[0]);
+    char selName[128] = {};
+    for (size_t i = 0; i < length; ++i) {
+        const char *type = method_getTypeEncoding(class_getInstanceMethod(cls, selectors[i]));
+        if (class_addMethod(cls, selectors[i], class_getMethodImplementation(cls, selectors[i]), type)) {
+            sprintf(selName, "_rt_flex_%s", sel_getName(selectors[i]));
+            SEL newSelector = sel_registerName(selName);
+            class_addMethod(cls, newSelector, class_getMethodImplementation(self, newSelector), type);
+            method_exchangeImplementations(class_getInstanceMethod(cls, selectors[i]),
+                                           class_getInstanceMethod(cls, newSelector));
+        }
+    }
+}
 
 - (YGLayout *)rt_layout
 {
@@ -96,19 +49,21 @@
         layout.enabled = !self.isHidden;
 
         Class superClass = object_getClass(self);
-        char name[128] = {};
-        sprintf(name, "RTFlexNotifying_%s", class_getName(superClass));
-        Class flexClass = objc_lookUpClass(name);
-        if (!flexClass) {
-            flexClass = objc_duplicateClass(superClass, name, 0);
-
-            class_addMethod(flexClass, @selector(setNeedsLayout), class_getMethodImplementation([__RTFlexView class], @selector(setNeedsLayout)), "v@:");
-            class_addMethod(flexClass, @selector(invalidateIntrinsicContentSize), class_getMethodImplementation([__RTFlexView class], @selector(invalidateIntrinsicContentSize)), "v@:");
-            class_addMethod(flexClass, @selector(layoutSubviews), class_getMethodImplementation([__RTFlexView class], @selector(layoutSubviews)), "v@:");
-            class_addMethod(flexClass, @selector(safeAreaInsetsDidChange), class_getMethodImplementation([__RTFlexView class], @selector(safeAreaInsetsDidChange)), "v@:");
-            class_addMethod(flexClass, @selector(setHidden:), class_getMethodImplementation([__RTFlexView class], @selector(setHidden:)), "v@:b");
+        const char *superClassName = class_getName(superClass);
+        if (strncmp(superClassName, "NSKVONotifying_", 15) == 0) {
+            [UIView _rt_flex_addMethodsForClass:superClass];
         }
-        object_setClass(self, flexClass);
+        else {
+            char name[128] = {};
+            sprintf(name, RTFLEXNOTIFYING_CLASS_PREFIX "%s", class_getName(superClass));
+            Class flexClass = objc_getClass(name);
+            if (!flexClass) {
+                flexClass = objc_allocateClassPair(superClass, name, 0);
+                [UIView _rt_flex_addMethodsForClass:flexClass];
+                objc_registerClassPair(flexClass);
+            }
+            object_setClass(self, flexClass);
+        }
 
         return layout;
     }
@@ -168,6 +123,84 @@
 - (void)rt_configureLayoutWithBlock:(void (^)(YGLayout * _Nonnull))block
 {
     block(self.rt_layout);
+}
+
+
+
+- (Class)_rt_flex_class
+{
+    Class cls = [self _rt_flex_class];
+    return class_getSuperclass(cls);
+}
+
+- (void)_rt_flex_setNeedsLayout
+{
+    [self _rt_flex_setNeedsLayout];
+    [self.rt_layout markDirty];
+}
+
+- (void)_rt_flex_invalidateIntrinsicContentSize
+{
+    [self _rt_flex_invalidateIntrinsicContentSize];
+
+    if (self.rt_automaticallyExcludeWhenIntrinsicSizeIsZero) {
+        CGSize size = [self intrinsicContentSize];
+        self.rt_layout.includedInLayout = size.width == 0 || size.height == 0;
+    }
+
+    [self rt_invalidateFlexLayout];
+}
+
+- (void)_rt_flex_setHidden:(BOOL)hidden
+{
+    [self _rt_flex_setHidden:hidden];
+
+    [self rt_configureLayoutWithBlock:^(YGLayout * _Nonnull layout) {
+        if (layout.isEnabled == hidden) {
+            layout.enabled = !hidden;
+            layout.includedInLayout = !hidden;
+            [self rt_invalidateFlexLayout];
+        }
+    }];
+}
+
+- (void)_rt_flex_layoutSubviews
+{
+    [self _rt_flex_layoutSubviews];
+
+    if (self.rt_enableAutoLayoutGuide) {
+        YGLayout *layout = self.rt_layout;
+        [self.subviews enumerateObjectsUsingBlock:^(__kindof UIView * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+            if ([obj isKindOfClass:NSClassFromString(@"_UILayoutGuide")]) {
+                if (CGRectGetMinY(obj.frame) == 0) {
+                    layout.paddingTop = YGPointValue(CGRectGetHeight(obj.bounds));
+                } else if (CGRectGetMaxY(obj.frame) == self.bounds.size.height) {
+                    layout.paddingBottom = YGPointValue(CGRectGetHeight(obj.bounds));
+                }
+            }
+        }];
+    }
+
+    if (!self.superview.isYogaEnabled) {
+        [self rt_applyFlexLayout];
+    }
+}
+
+- (void)_rt_flex_safeAreaInsetsDidChange
+{
+    [self _rt_flex_safeAreaInsetsDidChange];
+
+    if (!self.superview.isYogaEnabled) {
+        if (@available(iOS 11.0, *)) {
+            UIEdgeInsets insets = self.safeAreaInsets;
+            self.rt_layout.paddingTop = YGPointValue(insets.top);
+            self.rt_layout.paddingBottom = YGPointValue(insets.bottom);
+            self.rt_layout.paddingLeft = YGPointValue(insets.left);
+            self.rt_layout.paddingRight = YGPointValue(insets.right);
+        } else {
+            // Fallback on earlier versions
+        }
+    }
 }
 
 @end

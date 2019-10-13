@@ -26,8 +26,7 @@
         layout.flexWrap = YGWrapWrap;
         layout.alignItems = YGAlignFlexStart;
     }];
-    self.view.rt_enableAutoLayoutGuide = YES;
-    [self.view addObserver:self forKeyPath:NSStringFromSelector(@selector(frame)) options:NSKeyValueObservingOptionNew context:NULL];
+    
     {
         UILabel *label = [UILabel new];
         label.numberOfLines = 0;
@@ -42,14 +41,13 @@
     for (int i = 0; i < 12; ++i)
     {
         UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
+
         button.backgroundColor = [UIColor yellowColor];
         button.layer.borderWidth = 1.0 / [UIScreen mainScreen].scale;
         button.layer.cornerRadius = 8;
         button.titleLabel.font = [UIFont systemFontOfSize:12];
-        button.titleEdgeInsets = UIEdgeInsetsMake(10, 10, 10, 10);
         [button setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
         [button setTitle:[NSString stringWithFormat:@"Tag %d", i] forState:UIControlStateNormal];
-        [button sizeToFit];
         [button addTarget:self action:@selector(onAction:) forControlEvents:UIControlEventTouchUpInside];
         [button rt_configureLayoutWithBlock:^(YGLayout * _Nonnull layout) {
             layout.alignSelf = YGAlignCenter;
@@ -58,6 +56,8 @@
             layout.minWidth = YGPointValue(64);
             layout.marginBottom = YGPointValue(10);
         }];
+        [button addObserver:self forKeyPath:NSStringFromSelector(@selector(frame)) options:NSKeyValueObservingOptionNew context:NULL];
+        NSLog(@"%@", [button class]);
         [self.view addSubview:button];
     }
 
@@ -83,6 +83,7 @@
 - (void)onAction:(id)sender
 {
     self.view.rt_enableAutoLayoutGuide = !self.view.rt_enableAutoLayoutGuide;
+    [sender setHidden:![sender isHidden]];
 //    UILabel *label = [self.view.subviews filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self isKindOfClass: %@", [UILabel class]]].firstObject;
 //    [UIView animateWithDuration:0.3
 //                     animations:^{
