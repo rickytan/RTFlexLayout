@@ -157,9 +157,9 @@
 
     [self rt_configureLayoutWithBlock:^(YGLayout * _Nonnull layout) {
         if (layout.isEnabled == hidden) {
+            [self rt_invalidateFlexLayout];
             layout.enabled = !hidden;
             layout.includedInLayout = !hidden;
-            [self rt_invalidateFlexLayout];
         }
     }];
 }
